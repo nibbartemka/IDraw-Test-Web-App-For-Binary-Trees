@@ -1,0 +1,203 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Сеанс тестирования {% endblock %}
+
+{% macro render_list(data, index, value, identifier) %}
+    {% for item in data %}
+        <form action="" method="post">
+            <div class="card row-flex align-items-center margin-top">
+                <div class="column-flex">
+                    
+                        <input type="text" hidden name="subgroup_ids" value="{{subgroup_ids}}" />
+                        <input type="text" name="del_subgroup_id" value="{{item[index]|int}}" hidden>
+                        <div class="column-flex-item">
+                            <div>
+                            <!-- <a href="{{url_for('task_template_edit', task_template_id=item[index], is_directly=0)}}">  -->
+                            {{item[identifier]}}
+                            <!-- </a> -->
+                            <br>
+                            {{item[value]}}
+                            </div>
+                        </div>
+                </div>
+                <div>
+                    <input type="submit" name="del_task_template" value="Удалить" class="delete-button" {% if is_disable %} disabled {% endif %}/>
+                </div>
+            </div>
+        </form>
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_image_radio_button(label, select_name, indexes, values, checked_value) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <div style="overflow: auto;">
+            {% for index, value in zip(indexes, values) %}
+                <div class="formula-image row-flex">
+                    <img src="{{value}}"/>
+                    <input 
+                        type="radio" 
+                        value="{{index}}" 
+                        name="{{select_name}}" 
+                        {% if checked_value == index %} checked {% endif %} 
+                        {% if is_disable %} readonly {% endif %}
+                    />
+                </div>
+            {% endfor %}
+        </div>
+    </label>
+{% endmacro %}
+
+{% block content %}
+
+    <div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+        <p class="dropbtn">Редактирование сеанса тестирования</p>
+        
+        <div class="column-flex-item">
+            <p><a class="a_blue" href="{{url_for('testing_session', is_directly=is_directly)}}">Создать новый сеанс тестирования</a></p>
+            <p><a class="a_blue" href="{{url_for('testing_session_search')}}">Перейти к поиску сеанса тестирования</a></p>
+        </div>
+    </div>
+
+    <div class="row-flex" style="padding: 0px 120px;">
+    <div class="column-flex left-part-container" style="width: 40%;">
+        <form action="{{url_for('test_template_search', is_directly=0)}}" method="get">
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Шаблон теста: <input type="submit" value='Найти' name="find" class="transition_input" style = 'margin-bottom: 40px;' {% if is_disable %} disabled {% endif %}/><br>
+                </label>
+                    {% if test_template %}
+                        <div style="width: 100%;" class="card">
+                            <p>
+                                <a href="{{url_for('test_template_edit', test_template_id=test_template['test_template_id'], is_directly=0)}}">№{{test_template['test_template_id']}}</a>
+                                <br>
+                                {% for value in test_template['test_template_description'].split(SEPARATOR) %}
+                                    {{value}}<br>
+                                {% endfor %}
+                            </p>
+                        </div>
+                    {% endif %}
+                
+            </div>
+        </form>
+        <div class="column-flex-item">
+            <form action="{{url_for('subgroup_search', is_directly=0)}}" method="get">
+                <label class="b_filter">
+                    Подгруппы:
+                    <input type="submit" value="Найти" name="find" class="transition_input" {% if is_disable %} disabled {% endif %} />
+                </label>
+            </form>
+            <form action="" method="post">
+                {{render_list(subgroups, 'subgroup_id', 'student_count', 'subgroup_identifier')}}
+            </form>
+        </div>
+    </div>
+    <div class="column-flex left-part-container">
+        <form action="" method="post">
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Название тестирования:<br>
+                    <input class='input_text' type="text" maxlength="30" value="{{testing_session_name}}" name="testing_session_name" {% if is_disable %} readonly {% endif %} />
+                </label>
+            </div>
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Дата тестирования:<br>
+                    <input class="date_input" type="date" min="{{testing_session_date}}" value="{{testing_session_date}}" name="testing_session_date" {% if is_disable %} readonly {% endif %} />
+                </label>
+            </div>
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Время начала тестирования:<br>
+                    <input class="date_input" type="time" min={{testing_session_begin_time}} value="{{testing_session_begin_time}}" name="testing_session_begin_time" {% if is_disable %} readonly {% endif %}/>
+                </label>
+            </div>
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Время окончания тестирования:<br>
+                    <input class="date_input" type="time" min={{testing_session_begin_time}} value={{testing_session_end_time}} name="testing_session_end_time"  {% if is_disable %} readonly {% endif %}/>
+                </label>
+            </div>
+            <div class="column-flex-item">
+                <label class="b_filter">
+                    Балльность:<br>
+                    <input class='input_text' type="number" min=5 max="100"  name="testing_session_bar"  step="5" value={{testing_session_bar}} {% if is_disable %} readonly {% endif %} />
+                </label>
+            </div>
+            <div class="column-flex-item">
+                {{render_image_radio_button('Формула расчета оценки:', 'formula_test_id', formula_indexes, formula_pictures, formula_test_id)}}
+                <div><small>N - число заданий</small></div>
+                <div><small>r<sub>i</sub> - балл студента на i-ом задании</small></div>
+                <div><small>z<sub>i</sub> - сложность i-ого задания</small></div>
+                <div><small>B - бальность</small></div>
+                <div><small>Z - суммарная сложность заданий</small></div>
+            </div>
+            <input type="text" name="test_template_id" value="{{test_template_id}}" hidden />
+            <input type="text" name="subgroup_ids" value="{{subgroup_ids}}" hidden/>
+            <div class="column-flex-item margin-top">
+                <div class="row-flex">
+                    <div>
+                        <input type="submit" name="save" value="Сохранить" class="save-button" {% if is_disable %} disabled {% endif %}  />
+                    </div>
+                    <div>
+                        <input type="submit" name="delete" value="Удалить" class="delete-button" {% if is_disable %} disabled {% endif %}  />
+                    </div>
+                </div>
+            </div>
+            {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="column-flex-item message margin-top">{{message|safe}}</div>
+                        {% endfor %}
+                    {% endif %}
+            {% endwith %}
+        </form>
+        
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    <script>
+        const beginTimeName = 'testing_session_begin_time'
+        const beginTimeElement = document.querySelector(`input[name=${beginTimeName}]`)
+        const endTimeName = 'testing_session_end_time'
+        const endTimeElement = document.querySelector(`input[name=${endTimeName}]`)
+        const dateName = 'testing_session_date'
+        const dateElement = document.querySelector(`input[name=${dateName}]`)
+
+        const currentDate = new Date()
+        const minDate = currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1).toString().padStart(2, "0") + "-" + currentDate.getDate().toString().padStart(2, "0");
+        const minTime = beginTimeElement.min
+
+        dateElement.addEventListener('change', function() {
+            if (this.value !== minDate) {
+                beginTimeElement.min = ''
+                endTimeElement.min = ''
+            } else {
+                beginTimeElement.min = minTime
+                endTimeElement.min = minTime
+            }
+        })
+
+        beginTimeElement.addEventListener('change', function() { 
+            if (this.value > endTimeElement.value) { 
+                this.max = endTimeElement.value 
+            }  
+            else if (this.value < this.min) { 
+                this.min = this.value 
+            } 
+        }) 
+ 
+        endTimeElement.addEventListener('change', function() { 
+            if (this.value < beginTimeElement.value) { 
+                this.min = beginTimeElement.value 
+            }  
+            else if (this.value > this.max) { 
+                this.max = this.value 
+            } 
+        })
+    </script>
+{% endblock %}

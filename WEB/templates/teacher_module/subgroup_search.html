@@ -1,0 +1,84 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Найти подгруппы {% endblock %}
+
+{% macro render_list(data, index, value, identifier) %}
+    <table class="table">
+        <tr>
+            <th>Подгруппа</th>
+            <th>Кол-во студентов</th>
+            {% if not is_directly %}
+                <th>Выбрать?</th>
+            {% endif %}
+        </tr>
+        {% for item in data %}
+            <tr>
+                <td>{{item[identifier]}}</td>
+                <td>{{item[value]}}</td>
+                {% if not is_directly %}
+                    <td><input type="checkbox" value="{{item[index]}}" name="{{index}}" {% if not is_directly and item[index] in checked_values %} checked {% endif %}/></td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endmacro %}
+
+{% macro render_checkboxes(label, checkbox_name, data, index, value, checked_value) %}
+    <div class="column-flex-item b_filter">
+        <!-- <details {% if checked_value %} open {% endif %}> -->
+        {{label}} <br>
+        {% for item in data %}
+            <div class="b_filter">
+                {{item[value]}}
+                <input 
+                    type="checkbox" 
+                    value="{{item[index]}}" 
+                    name="{{checkbox_name}}"
+                    {% if item[index] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        <!-- </details> -->
+    </div>
+{% endmacro %}
+
+{% block content %}
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+    <p class="dropbtn">Все подгруппы</p>
+</div>
+    <div class="row-flex" style="padding: 0px 120px;">
+        <form action="" method="post">
+            <div class="column-flex">
+                <div class="column-flex-item">
+                    <div><b class="b_filter">Фильтры:</b></div>
+                    {{render_checkboxes('Группы:', 'group_id', groups, 'group_id', 'full_group_name', checked_groups)}}
+                </div>
+                <div class="column-flex-item">
+                    <input type="submit" name="filter" value="Применить" class="filter-button" />
+                </div>
+            </div>
+        </form>
+        <div class="column-flex">
+            <form action="{{testing_session_url}}" method="get">
+                <div class="column-flex-item" style="margin-bottom: 40px;" >
+                    <div><b class="b_filter">Мои подгруппы:</b></div>
+                    {% if my_subgroups %}
+                        {{render_list(my_subgroups, 'subgroup_id', 'student_count', 'subgroup_identifier')}}
+                    {% else %}
+                    <p class="b_filter">Упс... кажется подгрупп не найдено</p>
+                    {% endif %}
+                </div>
+                <div class="column-flex-item" >
+                    <div><b class="b_filter">Остальные подгруппы:</b></div>
+                    {% if other_subgroups %}
+                        {{render_list(other_subgroups, 'subgroup_id', 'student_count', 'subgroup_identifier')}}
+                    {% else %}
+                    <p class="b_filter">Упс... кажется подгрупп не найдено</p>
+                    {% endif %}
+                    {% if not is_directly %} <div class="column-flex-item margin-top"><input type="submit" value="Выбрать" class="choose-button"/></div> {% endif %}
+                </div>
+                
+            </form>
+        </div>
+    </div>
+{% endblock %}

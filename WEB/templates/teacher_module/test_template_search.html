@@ -1,0 +1,200 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Найти шаблон теста {% endblock %}
+
+{% macro render_checkboxes_from_simple_data(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value}}
+                <input 
+                    type="checkbox" 
+                    value="{{value}}" 
+                    name="{{checkbox_name}}"
+                    {% if value in checked_value %} checked {% endif %}
+                />
+                
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_checkboxes(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value[1]}}
+                <input 
+                    type="checkbox" 
+                    value="{{value[0]}}" 
+                    name="{{checkbox_name}}"
+                    {% if value[0] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_checkboxes_with_images(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary>{{label}}</summary>
+        {% for value in data %}
+            <div class="formula-image row-flex" style="width: 60%;">
+                <img src={{value[1]}} />
+                <input 
+                    type="checkbox" 
+                    value="{{value[0]}}" 
+                    name="{{checkbox_name}}"
+                    {% if value[0] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_number(label, first_name, second_name, min, max, step, first_value, second_value) %}
+    <div class="column-flex-item margin-top">
+        <label>
+            {{label}} <br>
+            от <input type="number" name="{{first_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{first_value}}" class="input_text">
+            до <input type="number" name="{{second_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{second_value}}" class="input_text">
+        </label>
+    </div>
+{% endmacro %}
+
+{% macro render_list(data, index, value, identifier) %}
+    {% for item in data %}
+        <div class="column-flex-item margin-top">
+            <form action="{{testing_session_url}}" method="get">
+                    <div class="row-flex">
+                        <input name="{{index}}" value="{{item[index]}}" hidden/>
+                    <p>
+                        <a href="{{url_for('test_template_edit', test_template_id=item[index], is_directly=is_directly)}}">№{{item[identifier]}}</a>
+                        <br>
+                        {{item[value]}}
+                    </p>
+                {% if not is_directly %}<p><input type="submit" value="выбрать" class="choose-button"/></p>{% endif %}
+                    </div>
+                    
+            </form>
+        </div>
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_test_data(data) %}
+    <div class="scroll column-flex-item">  
+        <table class="table">
+            <tr>
+                <th>Идентификатор</th>
+                <th>Операция</th>
+                <th>Тип дерева</th>
+                <th>Тип ключа</th>
+                <th>Высота</th>
+                <th>Кол-во ключей</th>
+                <th>Кол-во заданий</th>
+                <th>Общее кол-во</th>
+                <th>Сложность</th>
+                {% if not is_directly %}
+                    <th>Выбрать?</th>
+                {% endif %}
+            </tr>
+            {% for test in data %}
+                <form action="{{testing_session_url}}" method="get">
+                    {% for index in range(test['tasks']|length) %}
+                        <tr>
+                            {% if index == 0 %}
+                                <td rowspan="{{test['distinct_task_count']}}">
+                                    <a href="{{url_for('test_template_edit', test_template_id=test['test_template_id'], is_directly=is_directly)}}">№{{test['test_template_id']}}</a>
+                                </td>
+                            {% endif %}
+                            {% for col_value in test['tasks'][index]['task_template_description'].split(SEPARATOR) %}
+                                <td>
+                                    {{col_value}}
+                                </td>
+                            {% endfor %}
+                            <td>
+                                {{test['tasks'][index]['task_count']}}
+                            </td>
+                            {% if index == 0 %}
+                                <td rowspan="{{test['distinct_task_count']}}">
+                                    {{test['task_count']}}
+                                </td>
+                            {% endif %}
+                            {% if index == 0 %}
+                                <td rowspan="{{test['distinct_task_count']}}">
+                                    {{test['test_template_difficulty']}}
+                                </td>
+                            {% endif %}
+                            {% if index == 0 and not is_directly %}
+                                <td rowspan="{{test['distinct_task_count']}}">
+                                    <input name="test_template_id" value="{{test['test_template_id']}}" hidden/>
+                                   <input type="submit" value="выбрать" class="choose-button"/>
+                                </td>
+                            {% endif %}
+                        </tr>
+                    {% endfor %}
+                </form>
+            {% endfor %}
+        </table> 
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Все шаблоны тестов</p>
+    <a class="a_blue" href="{{url_for('test_template', is_directly=is_directly)}}">Создать новый шаблон теста</a>
+
+</div>
+
+
+<div class="row-flex" style = 'padding: 0px 120px;'>
+        <div class="column-flex left-part-container">
+            <form action="" method="post">
+                <div class="filter">
+
+                    <b class="b_filter">Фильтры:</b>
+                    {{render_checkboxes('Тип дерева:', 'tree_type_ids', _tree_types, tree_type_ids)}}
+                    {{render_checkboxes('Тип ключа:', 'key_template_ids', _key_templates, key_template_ids)}}
+                    {{render_checkboxes_from_simple_data('Тип операции:', 'operation_template_names', _operation_template, operation_template)}}
+                    {{render_number('Сложность:', 'difficulty_from', 'difficulty_to', _difficulty_min, _difficulty_max, 0.1, difficulty_from, difficulty_to)}}
+                    {{render_number('Кол-во заданий:', 'task_count_from', 'task_count_to', _task_count_min, _task_count_max, 1, task_count_from, task_count_to)}}
+                    
+                    <div style="display:flex;flex-direction:column;">
+                        <input type="submit" name="filter" value="Применить" class="transition_input" style="margin-bottom: 12px; margin-top: 12px;"/>
+                        <input type="submit" name="clear" value="Очистить" class="check_input" />
+                    </div>
+                
+                </div>
+            </form>
+        </div>
+        <div class="column-flex right-part-container">
+            <div class="column-flex-item" >
+                <b class="b_filter">Мои шаблоны тестов:</b>
+                {% if my_test_templates %}
+                    {{render_test_data(my_test_templates)}}
+                {% else %}
+                <p class="b_filter">Тесты не найдены</p>
+                {% endif %}
+            </div>
+            <div class="column-flex-item margin-top">
+                <b class="b_filter">Остальные шаблоны тестов:</b>
+                {% if other_test_templates %}
+                    {{render_test_data(other_test_templates)}}
+                {% else %}
+                <p class="b_filter">Тесты не найдены</p>
+                {% endif %}
+                
+            </div>
+    </div>
+</div>
+{% endblock %}

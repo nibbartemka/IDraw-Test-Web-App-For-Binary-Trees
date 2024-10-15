@@ -1,0 +1,73 @@
+{% extends "student_module/base.html" %}
+{% block title %}Главная страница{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+
+{% block content %}
+<div style="display: flex; flex-direction: row;">
+    <div style="height: 100%; width: 120px;">
+    </div>
+    <div  class = 'content'>
+        <div style="font-family: var(--font3);
+            font-weight: 700;
+            font-size: 32px;
+            line-height: 150%;
+            letter-spacing: 0em;
+            color: #000;
+            width: 1440px;
+            height: 40px;">
+            Ваши сеансы тестирования
+        </div>
+        
+        {{CreateListSession("Предстоящие","hideUpcomingSessions",'upcomingSessions',df_upcoming)}}
+
+        {{CreateListSession('Пройденные',"hidePassedSessions","passedSessions",df_passed)}}
+        
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    <script>
+        const upcomingSessionsName = 'upcomingSessions';
+        const upcomingSessionsElement = document.querySelector(`div[name=${upcomingSessionsName}]`);
+        
+        const passedSessionsName = 'passedSessions';
+        const passedSessionsElement = document.querySelector(`div[name=${passedSessionsName}]`);
+
+        const hideUpcomingSessionsButtonName = 'hideUpcomingSessions';
+        const hideUpcomingSessionsButtonElement = document.querySelector(`input[name=${hideUpcomingSessionsButtonName}]`);
+
+        const hidePassedSessionsButtonName = 'hidePassedSessions';
+        const hidePassedSessionsButtonElement = document.querySelector(`input[name=${hidePassedSessionsButtonName}]`);
+
+
+        hideUpcomingSessionsButtonElement.addEventListener('click', function() {
+            let elementHiddenAttribute = upcomingSessionsElement.getAttribute('hidden');
+
+            if (elementHiddenAttribute) {
+                upcomingSessionsElement.removeAttribute("hidden");
+                this.value = "Скрыть"
+            } else {
+                upcomingSessionsElement.setAttribute("hidden", "hidden");
+                this.value = "Показать"
+            }
+        });
+
+        hidePassedSessionsButtonElement.addEventListener('click', function() {
+            let elementHiddenAttribute = passedSessionsElement.getAttribute('hidden')
+
+            if (elementHiddenAttribute) {
+                passedSessionsElement.removeAttribute("hidden");
+                this.value = "Скрыть"
+            } else {
+                passedSessionsElement.setAttribute("hidden", "hidden");
+                this.value = "Показать"
+            }
+        });
+
+
+    </script>
+{% endblock %}

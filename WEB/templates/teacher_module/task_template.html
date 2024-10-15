@@ -1,0 +1,135 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Шаблон тестового задания {% endblock %}
+
+{% macro render_select(label, select_name, indexes, values, selected_value) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <select name="{{select_name}}" class="input_text" >
+            {% for index, value in zip(indexes, values) %}
+                <option class="input_text" value="{{index}}" {% if selected_value == str(index) %} selected {% endif %}>{{value}}</option>
+            {% endfor %}
+        </select>
+    </label>
+{% endmacro %}
+
+{% macro render_image_radio_button(label, select_name, indexes, values, checked_value) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <div style="overflow: auto;">
+            {% for index, value in zip(indexes, values) %}
+                <div class="formula-image row-flex">
+                    <img src="{{value}}"/>
+                    <input 
+                        type="radio" 
+                        value="{{index}}" 
+                        name="{{select_name}}" 
+                        {% if checked_value == index %} checked {% endif %} 
+                    />
+                </div>
+            {% endfor %}
+        </div>
+    </label>
+{% endmacro %}
+
+{% macro render_number(label, input_name, min, max, step, entered_value) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <input class="input_text" type="number" name="{{input_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{entered_value}}" />
+    </label>
+{% endmacro %}
+
+{% block content %}
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Создать тестовое задание</p>
+    {% if not is_directly %}
+    <p><a class="a_blue" href="{{url_for('task_template_search', is_directly=is_directly)}}">Перейти к выбору шаблона тестового задания</a></p>
+    <p><a class="a_blue" href="{{test_url}}">Вернуться к шаблону теста</a></p>
+    {% else %}
+        <p><a class="a_blue" href="{{url_for('task_template_search', is_directly=is_directly)}}">Перейти к поиску шаблона тестового задания</a></p>
+    {% endif %}
+</div>
+
+
+
+    <div class="column-flex" style="padding: 0px 120px;">
+        <div class="row-flex">
+            <div class="column-flex-item">
+                <form action="{{url_for('tree_template_search', is_directly=0)}}" method="get">
+                    <div class="column-flex" style="margin-bottom:40px">
+                    <label class="b_filter">
+                        Шаблон дерева:
+                        <input type="submit" value="Найти" name="find" class="choose-button"/>
+                    </label>
+                    {% if url_template_tree %}
+                    <div class='card label_filter'>
+
+                            <a href="{{url_template_tree}}">
+                                №{{tree_template_id}}-{{tree_structure}}<br>{{tree_template_data}}
+                            </a>
+                        </div>
+                    {% endif %}
+                     
+                </form>
+            </div>
+            
+            <form action="" method="post">
+                <div class="column-flex">
+                    <input type="text" value="{{tree_template_id}}" name="tree_template_id" hidden />
+                    <div class="column-flex-item">
+                        {% if operation_indexes %}
+                        {{render_select('Тип операции:', 'operation_template_id', operation_indexes, operation_values, operation_template_id)}}
+                        {% else %}
+                        Для выбора типа операции сначала укажите шаблон дерева!
+                        {% endif %}
+                    </div>
+                    <div class="column-flex-item">
+                        {{render_image_radio_button('Формула расчета балла:', 'formula_task_id', formula_indexes, formula_pictures, formula_task_id)}}
+                        <div><small>n - число шагов для выполнения задания</small></div>
+                        <div><small>m<sub>i</sub> - число ошибок пользователя на i-ом шаге</small></div>
+                    </div>
+                    <div name="diffuculty" class="column-flex-item">
+                        {% if not operation_indexes %}
+                        Для указания значения сложности сначала укажите тип операции!
+                        {% endif %}
+                    </div>
+                    <div class="column-flex-item">
+                        <input type="submit" name="save_template" value="Сохранить" class="transition_input" />
+                    </div>
+                    {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="column-flex-item message">{{message|safe}}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                   
+                </div>
+            </form>
+            
+        </div>
+
+        <input type="text" name="tree_structure" value="{{tree_structure}}" hidden />
+        <input type="text" name="tree_type_id" value="{{tree_type_id}}" hidden />
+        <input type="text" name="key_template_id" value="{{key_template_id}}" hidden />
+        <input type="text" name="tree_template_height" value="{{tree_template_height}}" hidden />
+        <input type="text" name="tree_template_keys_amount" value="{{tree_template_keys_amount}}" hidden />
+    
+        <div class="right-part-container">
+            <div class="column-flex-item">Возможный вариант дерева в тестовом задании:</div>
+            <div name="tree" class="tree margin-top ">
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    <script src="{{url_for('static', filename='js/Node.js')}}"></script>
+    <script src="{{url_for('static', filename='js/tree_base.js')}}"></script>
+    <script src="{{url_for('static', filename='js/BST.js')}}"></script>
+    <script src="{{url_for('static', filename='js/AVL.js')}}"></script>
+    <script src="{{url_for('static', filename='js/task_template_creation.js')}}"></script>
+{% endblock %}

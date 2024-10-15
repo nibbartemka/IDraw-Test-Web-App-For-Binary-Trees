@@ -1,0 +1,157 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Найти шаблон тестового задания {% endblock %}
+
+{% macro render_checkboxes_from_simple_data(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value}}
+                <input 
+                    type="checkbox" 
+                    value="{{value}}" 
+                    name="{{checkbox_name}}"
+                    {% if value in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_checkboxes(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value[1]}}
+                <input 
+                    type="checkbox" 
+                    value="{{value[0]}}" 
+                    name="{{checkbox_name}}"
+                    {% if value[0] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_checkboxes_with_images(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="formula-image row-flex" style="width: 60%;">
+                <img src={{value[1]}} />
+                <input 
+                    type="checkbox" 
+                    value="{{value[0]}}" 
+                    name="{{checkbox_name}}"
+                    {% if value[0] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_number(label, first_name, second_name, min, max, step, first_value, second_value) %}
+    <div class="column-flex-item margin-top">
+        <label>
+            {{label}} <br>
+            от <input type="number" name="{{first_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{first_value}}" class="input_text">
+            до <input type="number" name="{{second_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{second_value}}" class="input_text">
+        </label>
+    </div>
+{% endmacro %}
+
+{% macro render_list(data, index, value, identifier) %}
+    <div class="scroll column-flex-item" >
+        <table class="table">
+            <tr>
+                <th>Идентификатор</th>
+                <th>Операция</th>
+                <th>Тип дерева</th>
+                <th>Тип ключа</th>
+                <th>Высота</th>
+                <th>Кол-во ключей</th>
+                <th>Сложность</th>
+                {% if not is_directly %} <th>Выбрать?</th>{% endif %}
+            </tr>
+            {% for item in data %}
+                <tr>
+                    <td> <a href="{{url_for('task_template_edit', task_template_id=item[index], is_directly=is_directly)}}">№{{item[identifier]}}</a> </td>
+                    {% for col_value in item[value].split(SEPARATOR) %}
+                        <td>
+                            {{col_value}}
+                        </td>
+                    {% endfor %}
+                    {% if not is_directly %}
+                    <td>
+                        <input type="checkbox" value="{{item[index]}}" name="{{index}}" {% if not is_directly and item[index] in task_template_ids %} checked {% endif %}/>
+                    </td>
+                    {% endif %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Все тестовые задания</p>
+    <a class="a_blue" href="{{url_for('task_template', is_directly=is_directly)}}">Создать новый шаблон тестового задания</a>
+</div>
+
+    <div class="row-flex" style = 'padding: 0px 120px;'>
+        
+            <div class="column-flex left-part-container">
+                <form action="" method="post">
+                    <div class="column-flex-item"><b class="b_filter">Фильтры:</b>
+                    </div>
+                        {{render_checkboxes_from_simple_data('Высота:', 'tree_height', _tree_height, tree_height)}}
+                        {{render_checkboxes('Тип дерева:', 'tree_type_ids', _tree_types, tree_type_ids)}}
+                        {{render_checkboxes('Тип ключа:', 'key_template_ids', _key_templates, key_template_ids)}}
+                        {{render_checkboxes_from_simple_data('Тип операции:', 'operation_template_names', _operation_template, operation_template)}}
+                        {{render_checkboxes_with_images('Формула:', 'formula_task_ids', _formula_task, formula_for_task)}}
+                        {{render_number('Сложность:', 'difficulty_from', 'difficulty_to', _difficulty_min, _difficulty_max, 0.1, difficulty_from, difficulty_to)}}
+                        {{render_number('Кол-во узлов:', 'node_count_from', 'node_count_to', _node_count_min, _node_count_max, 1, node_count_from, node_count_to)}}
+                        <div style="display:flex;flex-direction:column;">
+                            <input type="submit" name="filter" value="Применить" class="transition_input" style="margin-bottom: 12px; margin-top: 12px;"/>
+                            <input type="submit" name="clear" value="Очистить" class="check_input" />
+                        </div>
+                </form>
+            </div>
+        
+        <div class="column-flex right-part-container">
+            <form action="{{test_url}}" method="get">
+                <div class="column-flex-item ">
+                    <div><b class="b_filter">Мои шаблоны тестовых заданий:</b></div>
+                    {% if my_task_templates %}
+                    {{render_list(my_task_templates, 'task_template_id', 'task_template_description', 'task_template_identifier')}}
+                    {% else %}
+                    <p class="b_filter">Упс... кажется шаблонов не найдено</p>
+                    {% endif %}
+                </div>
+                <div class="column-flex-item margin-top">
+                    <div><b class="b_filter">Остальные шаблоны тестовых заданий:</b></div>
+                    {% if other_task_templates %}
+                    {{render_list(other_task_templates, 'task_template_id', 'task_template_description', 'task_template_identifier')}}
+                    {% else %}
+                    <p class="b_filter">Упс... кажется шаблонов не найдено</p>
+                    {% endif %}
+                    
+                    {% if not is_directly %} <div class="column-flex-item margin-top"><input type="submit" value="Выбрать" class="transition_input"/></div> {% endif %}
+                </div>
+                
+            </form>
+        </div>
+    </div>
+{% endblock %}

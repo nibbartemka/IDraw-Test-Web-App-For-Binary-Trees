@@ -1,0 +1,54 @@
+{% extends "student_module/base.html" %}
+{% block title %}Главная страница{% endblock %}
+{% block head %}
+  {{ super() }}
+{% endblock %}
+{% block content %}
+<!-- <div style = 'width: 1280px;
+height: 150px;background: #f2f3f2;padding: 20px;'>
+</div> -->
+
+<div style="display: flex; flex-direction: column; justify-content: center; margin-left: 120px;">
+
+    <div style="height: 40px; width: 100%;">
+    </div>
+
+    <div style="font-family: var(--font3);
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 133%;
+    letter-spacing: 0.01em;
+    color: #000; ">Информация о сеансе тестирования</div>
+
+    <div  class = 'content' style = 'padding: 20px;
+    width: 480px;
+    height: 100%;border: 1px solid rgba(102, 114, 127, 0.16);
+    border-radius: 8px;
+    padding: 20px 28px;
+    box-shadow: 0 4px 12px 0 rgba(4, 28, 36, 0.08);
+    background: #fff; margin-top: 20px;display: flex;
+    flex-direction: row; gap:20px; justify-content: start;'>
+        <div style = 'display: flex; flex-direction: column;font-family: var(--font3);
+        font-weight: 400;
+        font-size: 18px;
+        line-height: 133%;
+        letter-spacing: 0.01em;
+        color: #000;'>
+                <p>Название:  {{df_description[0]['testing_session_name']}}</p>
+                <p>Организатор: {{df_description[0]['teacher_name']}}</p>
+                <p>Дата начала: {{df_description[0]['testing_session_date']}}</p>
+                <p>Время начала: {{df_description[0]['testing_session_begin_time']}}</p>
+                <p>Время окончания: {{df_description[0]['testing_session_end_time']}}</p>
+                <p>Макс.Балл: {{df_description[0]['test_template_bar']}}</p>
+                <p>Количество заданий: {{df_description[0]['count_task']}}</p>
+        </div>
+
+     
+        
+    </div>
+    <form action="{{url_for('task_pass', testing_session_id=testing_session_id)}}" method = 'post' style="text-align: right;margin-right: 200px; margin-top: 24px;">
+        <input type = 'submit'  value = 'Начать тестирование' class="transition_input" name="begin_testing" {%if not time %} disabled title = 'Время ещё не пришло' {%else%} title = 'Время пришло' {%endif%}>
+    </form>
+</div>
+{% endblock %}
+

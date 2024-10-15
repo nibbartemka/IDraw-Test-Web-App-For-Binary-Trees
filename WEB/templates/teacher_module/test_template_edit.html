@@ -1,0 +1,147 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Шаблон теста {% endblock %}
+
+{% macro render_number(label, input_name, min, max, step, entered_value) %}
+    <div class="column-flex-item">
+        <label class="b_filter">
+            {{label}} <br>
+            <input class="input_text" type="number" name="{{input_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{entered_value}}" {% if disable_type in (2,) %} readonly {% endif %}/>
+        </label>
+    </div>
+{% endmacro %}
+
+{% macro render_list(data, index, value, identifier) %}
+    {% for item in data %}
+        <form action="" method="post">
+            <div class="card row-flex align-items-center">
+                <div class="column-flex">
+                    
+                        <input type="text" hidden name="task_template_ids" value="{{task_templates_ids}}" />
+                        <input type="text" name="del_task_template_id" value="{{item[index]|int}}" hidden>
+                        <div class="column-flex-item">
+                            <div>
+                            <a href="{{url_for('task_template_edit', task_template_id=item[index], is_directly=0)}}"> 
+                                №{{item[identifier]}}
+                            </a>
+                            <br>
+                            {{item[value]}}
+                            </div>
+                            <label>
+                                Кол-во:
+                                <input class="input_text" type="number" name="{{item[index]|int}}" min="1" max='10' value="1">
+                            </label>
+                        </div>
+                </div>
+                <div>
+                    <input type="submit" name="del_task_template" value="Удалить" class="delete-button" {% if disable_type in (1, 2) %} disabled {% endif %}/>
+                </div>
+            </div>
+        </form>
+    {% endfor %}
+{% endmacro %}
+
+{% block content %}
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Редактирование шаблона теста</p>
+    
+    <div class="column-flex-item" >
+        {% if not is_directly %}
+        <p><a class="a_blue" href="{{url_for('test_template_search', is_directly=is_directly)}}">Перейти к выбору шаблона теста</a></p>
+        <p><a class="a_blue" href="{{testing_session_url}}">Вернуться к сеансу тестирования</a></p>
+        {% else %}
+            <p><a class="a_blue" href="{{url_for('test_template_search', is_directly=is_directly)}}">Перейти к поиску шаблона теста</a></p>
+        {% endif %}
+        <p><a class="a_blue" href="{{url_for('test_template', is_directly=is_directly)}}">Создать новый шаблон</a></p>
+    </div>
+</div>
+
+    <input type="text" name="disable_type" value="{{disable_type}}" hidden />
+    <div class="column-flex" style="padding: 0px 120px;">
+        <div class="column-flex-item">
+           
+        <form action="{{url_for('task_template_search', is_directly=0)}}" method="get">
+            <label class="b_filter"> Шаблоны тестовых заданий:
+                <input type="submit" value="Найти" name="find" class="save-button" {% if disable_type in (1, 2) %} disabled {% endif %} />
+            </label>
+        </form>
+        {{render_list(task_templates, 'task_template_id', 'task_template_description', 'task_template_identifier')}}
+        </div>
+        <form action="" method="post">
+            <input type="text" hidden name="task_template_ids" value="{{task_templates_ids}}" />
+            {{render_number('Сложность:', 'test_template_difficulty', 0, 1, 0.1, test_template_difficulty)}}
+            <div name="task_template_count">
+            </div>
+            <div class="column-flex-item margin-top">
+                <input type="submit" name="save_template" value="Сохранить" class="save-button" {% if disable_type == 2 %} disabled {% endif %} />
+                <input type="submit" name="del_template" value="Удалить" class="delete-button" {% if disable_type in (1, 2) %} disabled {% endif %}/>
+            </div>
+        </form>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="column-flex-item message">{{message|safe}}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+      
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+    <script>
+        const testTemplateIdsName = 'task_template_ids'
+        const testTemplateIdsElement = document.querySelector(`input[name=${testTemplateIdsName}]`)
+        const countTestTemplateName = 'task_template_count'
+        const countTestTemplateElement = document.querySelector(`div[name=${countTestTemplateName}]`)
+        const disableTypeName = 'disable_type'
+        const disableTypeElement = document.querySelector(`input[name=${disableTypeName}]`)
+        const separator = ';'
+        const data = JSON.parse({{json_data|tojson}})
+
+        let countInputElements = ''
+        let testTemplateIds = testTemplateIdsElement.value.split(separator)
+        let disableType = +disableTypeElement.value
+
+        for (let num in testTemplateIds) {
+            let element = document.querySelector(`input[name='${testTemplateIds[num]}']`);
+            let value = (data[testTemplateIds[num]]) ? (data[testTemplateIds[num]]) : 1;
+            element.value = value;
+            if (disableType) {
+                element.readOnly = true
+            }
+        }        
+
+        for (let num in testTemplateIds) {
+            let value = (data[testTemplateIds[num]]) ? (data[testTemplateIds[num]]) : 1;
+            countInputElements += `
+                <input type='text' hidden name='count_${testTemplateIds[num]}' value='${value}' />
+            `
+        }
+        countTestTemplateElement.innerHTML = countInputElements
+
+        for (let num in testTemplateIds) {
+            let element = document.querySelector(`input[name='${testTemplateIds[num]}']`)
+            element.addEventListener('change', function() {
+                let value = document.querySelector(`input[name='${testTemplateIds[num]}']`).value
+                let changingElement = document.querySelector(`input[name='count_${testTemplateIds[num]}']`)
+                changingElement.value = value
+            });
+        }
+    </script>
+    <script>
+        const testDifficultyElement = document.querySelector(`input[name='test_template_difficulty']`)
+
+        testDifficultyElement.addEventListener('change', function() {
+            if (this.value < this.min) {
+                this.value = this.min
+            } else if (this.value > this.max) {
+                this.value = this.max
+            }
+        })
+    </script>
+{% endblock %}

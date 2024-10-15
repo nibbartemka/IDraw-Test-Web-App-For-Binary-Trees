@@ -1,0 +1,129 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Найти шаблон дерева {% endblock %}
+
+{% macro render_checkboxes_from_simple_data(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+        <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value}}
+                <input 
+                    type="checkbox" 
+                    value="{{value}}" 
+                    name="{{checkbox_name}}"
+                    {% if value in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_checkboxes(label, checkbox_name, data, checked_value) %}
+    <div class="column-flex-item margin-top">
+        <details {% if checked_value %} open {% endif %}>
+            <summary class="b_filter">{{label}}</summary>
+        {% for value in data %}
+            <div class="b_filter">
+                {{value[1]}}
+                <input 
+                    type="checkbox" 
+                    value="{{value[0]}}" 
+                    name="{{checkbox_name}}"
+                    {% if value[0] in checked_value %} checked {% endif %}
+                />
+            </div>
+        {% endfor %}
+        </details>
+    </div>
+{% endmacro %}
+
+{% macro render_number(label, first_name, second_name, min, max, step, first_value, second_value) %}
+    <div class="column-flex-item margin-top">
+        <label class="b_filter">
+            {{label}} <br>
+            от <input class="input_text" type="number" name="{{first_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{first_value}}">
+            до <input class="input_text" type="number" name="{{second_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{second_value}}">
+        </label>
+    </div>
+{% endmacro %}
+
+{% macro render_list(data, index, value, identifier) %}
+    <div class="scroll column-flex-item ">
+        <table class="table">
+            <tr>
+                <th>Идентификатор</th>
+                <th>Тип дерева</th>
+                <th>Тип ключа</th>
+                <th>Высота</th>
+                <th>Кол-во ключей</th>
+                <th>Сложность</th>
+                {% if not is_directly %} <th>Выбрать?</th>{% endif %}
+            </tr>
+            {% for item in data %}
+                <tr>
+                    <form action="{{task_url}}" method="get">
+                            <input name="{{index}}" value="{{item[index]}}" hidden/>
+                            <td>
+                                <a href="{{url_for('tree_template_edit', tree_template_id=item[index], is_directly=is_directly)}}">№{{item[identifier]}}</a>
+                            </td>
+                            {% for col_value in item[value].split(SEPARATOR) %}
+                            <td>
+                                {{col_value}}
+                            </td>
+                            {% endfor %}
+                        {% if not is_directly %}<td><input type="submit" value="выбрать" class="choose-button"/></td>{% endif %} 
+                    </form>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% block content %}
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+    <p class="dropbtn">Все шаблоны деревьев</p>
+    <a class="a_blue" href="{{url_for('tree_template', is_directly=is_directly)}}">Создать новый шаблон дерева</a>
+</div>
+
+
+    <div class="row-flex" style="padding: 0px 120px;">
+        <div class="column-flex left-part-container">
+            <form action="" method="post">
+            <div class="column-flex-item"><b class="b_filter">Фильтры:</b>
+            </div>
+                {{render_checkboxes_from_simple_data('Высота:', 'tree_height', _tree_height, tree_height)}}
+                {{render_checkboxes('Тип дерева:', 'tree_type_ids', _tree_types, tree_type_ids)}}
+                {{render_checkboxes('Тип ключа:', 'key_template_ids', _key_templates, key_template_ids)}}
+                {{render_number('Сложность:', 'difficulty_from', 'difficulty_to', _difficulty_min, _difficulty_max, 0.1, difficulty_from, difficulty_to)}}
+                {{render_number('Кол-во узлов:', 'node_count_from', 'node_count_to', _node_count_min, _node_count_max, 1, node_count_from, node_count_to)}}
+             
+                <div style="display:flex;flex-direction:column;">
+                    <input type="submit" name="filter" value="Применить" class="transition_input" style="margin-bottom: 12px; margin-top: 12px;"/>
+                    <input type="submit" name="clear" value="Очистить" class="check_input" />
+                </div>
+            </form>
+        </div>
+        <div class="column-flex">
+            <div class="column-flex-item" >
+                <div><b class="b_filter">Мои шаблоны деревьев:</b></div>
+                {% if my_tree_templates %}
+                {{render_list(my_tree_templates, 'tree_template_id', 'tree_template_description', 'tree_template_identifier')}}
+                {% else %}
+                <p class="b_filter">Упс... кажется шаблонов не найдено</p>
+                {% endif %}
+            </div>
+            <div class="column-flex-item margin-top" >
+                <div><b class="b_filter">Остальные шаблоны деревьев:</b></div>
+                {% if other_tree_templates %}
+                {{render_list(other_tree_templates, 'tree_template_id', 'tree_template_description', 'tree_template_identifier')}}
+                {% else %}
+                <p class="b_filter">Упс... кажется шаблонов не найдено</p>
+                {% endif %}
+                
+            </div>
+        </div>
+    </div>
+{% endblock %}

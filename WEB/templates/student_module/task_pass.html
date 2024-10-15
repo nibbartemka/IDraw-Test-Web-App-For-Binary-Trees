@@ -1,0 +1,963 @@
+{% extends "student_module/base.html" %}
+{% block title %}Главная страница{% endblock %}
+{% block head %}
+<link rel="stylesheet" type="text/css" href="/static/style.css" />
+  {{ super() }}
+{% endblock %}
+{% block content %}
+
+    {% if not is_last %}
+
+        <input type="text" name="tree_structure" value="{{tree_structure}}" hidden/>
+        <input type="text" name="tree_type_id" value="{{tree_type_id}}" hidden/>
+        <input type="text" name="key_template_id" value="{{key_template_id}}" hidden/>
+        <input type="text" name="tree_template_height" value="{{tree_template_height}}" hidden/>
+        <input type="text" name="tree_template_height" value="{{task_index}}" hidden/>
+        
+        <div class="card_task">
+            
+            <div style='display: flex; flex-direction: column;'>
+                <div style="display: flex; flex-direction: column; 
+                width: 328px;" class="card">
+                    <div name="alert">
+
+                    </div>
+
+                    <p style="font-family: var(--font3);
+                    font-weight: 600;
+                    font-size: 24px;
+                    line-height: 133%;
+                    letter-spacing: 0.01em;
+                    color: #000;">Задание №{{task_index}} (всего {{tasks_count}}) <br> {% if tree_type_id == 1 %} БДП {% else %} АВЛ {%endif%}</p>
+
+
+                    <!-- <div type="text" name="treeNodes" style="font-family: var(--font3);
+                    font-weight: 400;
+                    font-size: 18px;
+                    line-height: 133%;
+                    letter-spacing: 0.01em;
+                    color: #000;">
+                        Выделенные узлы 
+                    </div> -->
+
+                    <div name="operation_block" class="description_task">
+                    </div>
+
+                    <form action="{{url_for('task_pass',testing_session_id=testing_session_id)}}" method="post">
+                        <input type="text" name="suboperation_error_count" hidden />
+                        <input type="text" name="step_count" hidden/>
+                        <input  value = 'Завершить тестирование' type = 'submit' class="delete-button" style="margin-top:36px; width: 328px;
+                         " name="complete"> 
+                    </form>
+                    
+                </div>
+                <div name="decision">
+                </div>
+
+            </div>
+            <div name="tree" class ='card_tree'>
+            </div>
+        </div>
+
+    {% else %}
+        
+        
+        <!-- <form action="{{url_for('task_pass',testing_session_id=testing_session_id)}}" method="get">
+            <input value = 'Следующее задание' type = 'submit'> 
+        </form> -->
+
+        <div style="border-radius: 16px;
+            padding: 40px;
+            width: 600px;
+            height: 279px;display: flex; flex-direction: column; justify-content: center; align-items: center; 
+            margin-left: 30%; margin-top: 10%;">
+            
+                <p style="font-family: var(--font3);
+                font-weight: 500;
+                font-size: 24px;
+                line-height: 133%;
+                letter-spacing: 0.01em;
+                color: #000;">{{end_text}}</p>
+
+                <p style="font-family: var(--font3);
+                font-weight: 500;
+                font-size: 24px;
+                line-height: 133%;
+                letter-spacing: 0.01em;
+                color: #000;">Набранно баллов:</p>
+                <div style="border-radius: 8px;
+                padding: 20px 24px;
+                width: 174px;
+                height: 64px;background: rgba(30, 181, 76, 0.1);font-family: var(--font-family);
+                font-weight: 700;
+                font-size: 32px;
+                line-height: 75%;
+                letter-spacing: 0em;
+                color: #0e5323; text-align: center;">
+                {{test_mark}} </div>
+            <form action="{{url_for('student_index')}}" method="get">
+                <input  value = 'Вернуться на главную' type = 'submit' class="transition_input" style="margin-top: 36px;"> 
+            </form>
+        </div>
+
+    {% endif %}
+
+
+            
+            
+
+          
+{% endblock %}
+{% block footer %}
+    <script src="https://cdn.jsdelivr.net/lodash/4.10.0/lodash.js"></script>
+    <script src="{{url_for('static', filename='js/Node.js')}}"></script>
+    <script src="{{url_for('static', filename='js/tree_base.js')}}"></script>
+    <script src="{{url_for('static', filename='js/BST.js')}}"></script>
+    <script src="{{url_for('static', filename='js/AVL.js')}}"></script>
+    <script>
+        function findChangeNode(node, isMaxLeft) {
+            let resNode = null;
+
+            if (node==null) {
+                return resNode
+            }
+
+            if (node.left != null && node.right != null) {
+                if (!isMaxLeft) {
+                    let minRight = node.right;
+                    while (minRight.left != null) {
+                        minRight = minRight.left;
+                    }
+                    resNode = minRight;
+                } else {
+                    let maxLeft = node.left;
+                    while (maxLeft.right != null) {
+                        maxLeft = maxLeft.right;
+                    }
+                    resNode = maxLeft;
+                }
+                
+            } else if (node.left === null) {
+                resNode = node.right;
+            } else {
+                resNode = node.left;
+            }
+
+            return resNode;
+        }
+
+        function getTree(treeType) {
+            if (treeType == 1) { // БДП
+                return new BinarySearchTree()
+            } else if (treeType == 2) { // АВЛ
+                return new AVLTree()
+            }
+        }
+        
+        function fillTree(tree, valueList, operation_template_id, hasDublicate=false, isDublicateLeft=false) {
+            if (valueList.length === 0) {
+                return;
+            }
+            // console.log(valueList)
+            tree.freeMemory();
+            Array.from(valueList).forEach(element => {
+                if (element !== undefined) {
+                    if ([5, 6].includes(operation_template_id)) {
+                        tree.insert(element, hasDublicate, isDublicateLeft)
+                    } else {
+                        tree.insert(element) 
+                    }
+                }
+            });
+
+            treeDivElement.innerHTML = tree.treePrinter()
+        }
+
+        function generateNumValuesFromStructure(list) {
+            if (!list) {
+                return []
+            }
+
+            let maxNodes = list.length
+            let arr = [...list]
+            arr[0] = Math.floor(Math.random() * MAX_INT) + 20
+            
+            empty_indexes = []
+            for (let index = 1; index < maxNodes; index++) {
+                if (arr[index]) {
+                    empty_indexes.push(index)
+                }
+            }
+            
+            for (let i in empty_indexes) {
+                let cur_index = empty_indexes[i];
+                let prev_index = Math.floor((cur_index - 1) / 2)
+                head_index = prev_index
+                is_odd = head_index % 2
+            
+                if (prev_index % 2 == cur_index % 2) {
+                    while (head_index > 0 && head_index % 2 == is_odd) {
+                        head_index = Math.floor((head_index - 1) / 2)
+                    }
+                }
+                else {
+                    temp = Math.floor((head_index - 1) / 2)
+                    head_index = (temp < 0) ? 0 : temp
+                }
+                
+                if (head_index < 0) {
+                    head_index = 0
+                } else {
+                    if (cur_index % 2 == prev_index % 2) {
+                        temp = Math.floor((head_index - 1) / 2)
+                        head_index = (temp < 0) ? 0 : temp
+                    }
+                }
+                
+                if (prev_index == head_index) {
+                    if (cur_index % 2) {
+                        cur_value = Math.floor(Math.random() * arr[prev_index])
+                    } else {
+                        cur_value = Math.floor(Math.random() * MAX_INT) + arr[prev_index]
+                    }
+                } else {
+                    if (cur_index % 2 == 0 && prev_index % 2 == 1) {
+                        cur_value = Math.floor(Math.random() * (arr[head_index] - arr[prev_index])) + arr[prev_index]
+                    } else if (cur_index % 2 == 1 && prev_index % 2 == 0) {
+                        cur_value = Math.floor(Math.random() * (arr[prev_index] - arr[head_index])) + arr[head_index]
+                    } else if (cur_index % 2 == 1 && prev_index % 2 == 1) {
+                        temp_runner = cur_index
+                        temp_is_odd = temp_runner % 2
+                        flag = false
+                        while (!flag && temp_runner > 0) {
+                            if (temp_runner % 2 != temp_is_odd)
+                                flag = true
+                            temp_runner =  Math.floor((temp_runner - 1) / 2)
+                        }
+                        if (flag)
+                            cur_value = Math.floor(Math.random() * (arr[prev_index] - arr[head_index])) + arr[head_index]
+                        else
+                            cur_value = Math.floor(Math.random() * (arr[prev_index]))
+                    } else {
+                        temp_runner = cur_index
+                        temp_is_odd = temp_runner % 2
+                        flag = false
+                        while (!flag && temp_runner > 0) {
+                            if (temp_runner % 2 != temp_is_odd)
+                                flag = true
+                            temp_runner =  Math.floor((temp_runner - 1) / 2)
+                        }
+                        if (flag)
+                            cur_value = Math.floor(Math.random() * (arr[head_index] - arr[prev_index])) + arr[prev_index]
+                        else
+                            cur_value = Math.floor(Math.random() * (MAX_INT)) + arr[prev_index]
+                    }
+                }
+
+                arr[cur_index] = cur_value
+            
+                prev_index = cur_index
+                cur_index = 2 * prev_index + 1 + Math.floor(Math.random() * 2);
+            }
+            return arr
+        }
+
+        function getTreeValuesFromStructure(value, keyTypeValue) {
+            treeValues = generateNumValuesFromStructure(value.map(function(x) {
+                if (parseInt(x)) {
+                    return x;
+                }
+            }))
+
+            if (keyTypeValue == 2) { // Строковый
+                treeValues = treeValues.map(function(item) {
+                    if (item === undefined){
+                        return item
+                    }
+            
+                    first_letter_index = Math.floor(item / 10)
+                    second_letter_index = item % 10
+                    return alphabet[first_letter_index] + alphabet[second_letter_index];
+                })
+            }
+
+            return treeValues;
+        }
+
+        function hasDuplicates(arr) {
+            let filteredArray = arr.filter(value => value !== undefined);
+            let uniqueValues = new Set(filteredArray);
+        
+            return filteredArray.length !== uniqueValues.size;
+        }
+
+        function showSelectedNodes(block, nodes) {
+            // let str = "Выделенные узлы: ";
+            let str = ''
+            nodes.forEach(element => {
+                str += element + " ";
+            });
+
+            if (block) {
+                block.innerText = str;
+            } else {
+                // console.log(str);
+            }
+        }
+
+        function selectNode(elem) {
+            if (elem.isSelected) {
+                elem.classList.remove("selected");
+                selectedNodes.splice(selectedNodes.indexOf(elem.innerText), 1);
+            } else {
+                elem.classList.add("selected");
+                selectedNodes.push(elem.innerText);
+            }
+            showSelectedNodes(treeNodesElement, selectedNodes);
+            elem.isSelected = !elem.isSelected;
+            
+            return elem;
+        }
+
+        function getDublicates(treeValues, nodeIndex, isDublicateLeft) {
+            let result = []
+ 
+            let index = Math.floor((nodeIndex - 1) / 2);
+ 
+            if (isDublicateLeft) {
+                while (index > 0 && index % 2) {
+                    result.push(treeValues[index]);
+                    index = Math.floor((index - 1) / 2);
+                }
+ 
+                // if (index === 0 && Math.floor((nodeIndex - 1) / 2) % 2) {
+                //     result.push(treeValues[index]);
+                // }
+ 
+                if (index > 0) {
+                    result.push(treeValues[index]);
+ 
+                    if (index === Math.floor((nodeIndex - 1) / 2)) {
+                        while (index > 0 && !(index % 2)) {
+                            index = Math.floor((index - 1) / 2);
+                        }
+ 
+                        if (index > 0) {
+                            index = Math.floor((index - 1) / 2);
+                            result.push(treeValues[index]);
+                        }
+                    }
+                }
+            } else {
+                // console.log(index)
+                while (index > 0 && !(index % 2)) {
+                    result.push(treeValues[index]);
+                    index = Math.floor((index - 1) / 2);
+                }
+                // console.log(index)
+                if (index > 0) {
+                    result.push(treeValues[index]);
+ 
+                    if (index === Math.floor((nodeIndex - 1) / 2)) {
+                        while (index > 0 && index % 2) {
+                            index = Math.floor((index - 1) / 2);
+                            // console.log(index)
+                        }
+ 
+                        if (index > 0) {
+                            index = Math.floor((index - 1) / 2);
+                            // console.log(index)
+                            result.push(treeValues[index]);
+                        }
+                    }
+                }
+
+                // console.log(result)
+            }
+ 
+            console.log(result)
+            return result[Math.floor(Math.random() * result.length)]
+        }            
+    </script>
+    <script>
+        let count_error=0
+        const treeDivName = "tree"
+        const treeDivElement = document.querySelector(`div[name=${treeDivName}]`);
+        const treeTypeName = "tree_type_id"
+        const treeTypeElement = document.querySelector(`input[name=${treeTypeName}]`);
+        const keyTypeName = "key_template_id"
+        const keyTypeElement = document.querySelector(`input[name=${keyTypeName}]`);
+        const treeStructureName = "tree_structure"
+        const treeStructureElement = document.querySelector(`input[name=${treeStructureName}]`)
+        const treeHeightName = "tree_template_height";
+        const treeHeightElement = document.querySelector(`input[name=${treeHeightName}]`);
+        const treeNodesName = "treeNodes";
+        let treeNodesElement = document.querySelector(`div[name=${treeNodesName}]`);
+        
+        const alphabet = [
+           'A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z',
+           'a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'
+        ]
+
+        const MAX_INT = 100
+
+        const operationBlock = document.querySelector(`div[name="operation_block"]`)
+        const operationData = JSON.parse({{operation_data | tojson}})[0];
+        const suboperationData = JSON.parse({{suboperation_data | tojson}});
+
+        let selectedNodes = []
+
+        let treeTypeValue = +treeTypeElement.value;
+        let tree = getTree(treeTypeValue);
+        let keyTypeValue = +keyTypeElement.value;
+        let treeValues = []
+        let treeHeight = +treeHeightElement.value;
+
+        let fullTreeValues = []
+
+        let treeStructure = treeStructureElement.value.split('')
+        
+        if ([7, 8, 9, 10].includes(+operationData['operation_template_id'])) {
+            if (treeStructure.length < operationData['node_index']) {
+                while (treeStructure.length < Math.pow(2, treeHeight + 1)) {
+                    treeStructure.push('0');
+                }
+            }
+            treeStructure[operationData['node_index']] = '1'
+        }
+        
+        do {
+            treeValues = getTreeValuesFromStructure(treeStructure, keyTypeValue)
+            
+            if ([7, 8, 9, 10].includes(+operationData['operation_template_id'])) {
+                fullTreeValues = [...treeValues]
+                isDublicating = hasDuplicates(fullTreeValues)
+                treeValues[operationData['node_index']] = undefined;
+                
+            } else {
+                isDublicating = hasDuplicates(treeValues)
+            }
+            
+            treeValues = treeValues.slice(0, Math.pow(2, treeHeight) - 1);
+            
+            fillTree(
+                tree, 
+                treeValues,
+                +operationData['operation_template_id']
+            );
+
+        } while (tree.height(tree.root) !== treeHeight || isDublicating)
+
+        // console.log('BBBBBB', getDublicates(fullTreeValues, 11))
+    </script>
+    <script>
+        class inputData {
+            constructor(keys=[], isTree=false) {
+                this.keys = keys;
+                this.isTree = isTree;
+            }
+        }
+
+        class outputData {
+            constructor(keys=[], isTree=false) {
+                this.keys = keys;
+                this.isTree = isTree;
+            }
+        }
+
+        class SubOperation {
+            constructor(text, inputData=null, outputData=null) {
+                this.text = text;
+                this.inputData = inputData;
+                this.outputData = outputData;
+            }
+        }
+
+        class Operation {
+            constructor(text, subOperations, inputData=null, outputData=null) {
+                this.text = text;
+                this.subOperations = subOperations;
+                this.inputData = inputData;
+                this.outputData = outputData;
+            }
+        }
+
+    </script>
+    <script>
+        let addValue;
+        let suboperation_error_count = {0:0}
+
+        let suboperations = Array.from(suboperationData).map( (item) => {
+            if ([1, 2].includes(+operationData['operation_template_id'])) { // Обходы пямые БДП, АВЛ
+                newSuboperation = new SubOperation(
+                    item['suboperation_text'],
+                    new inputData(tree.bfs(tree.root), Boolean(item['input_is_tree'])),
+                    new outputData(tree.preorderTraversal(tree.root), Boolean(item['output_is_tree']))
+                );
+                return newSuboperation;
+            }
+            else if ([3, 4].includes(+operationData['operation_template_id'])) { // Обходы симметричные БДП, АВЛ
+                newSuboperation = new SubOperation(
+                    item['suboperation_text'],
+                    new inputData(tree.bfs(tree.root), Boolean(item['input_is_tree'])),
+                    new outputData(tree.inorderTraversal(tree.root), Boolean(item['output_is_tree']))
+                );
+                return newSuboperation;
+            }
+            else if ([15, 16].includes(+operationData['operation_template_id'])) { // Обходы обратные БДП, АВЛ
+                newSuboperation = new SubOperation(
+                    item['suboperation_text'],
+                    new inputData(tree.bfs(tree.root), Boolean(item['input_is_tree'])),
+                    new outputData(tree.postorderTraversal(tree.root), Boolean(item['output_is_tree']))
+                );
+                return newSuboperation;
+            }
+        });
+
+        operationIO = []
+        if ([1, 2].includes(+operationData['operation_template_id'])) {
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(tree.bfs(tree.root), false)
+            ]
+        } else if ([3, 4].includes(+operationData['operation_template_id'])) {
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(tree.bfs(tree.root), false)
+            ]
+        } else if ([15, 16].includes(+operationData['operation_template_id'])) {
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(tree.bfs(tree.root), false)
+            ]
+        }
+
+        if ([11, 12].includes(+operationData['operation_template_id'])) { // Удаление узла с заменой на мин. справа и макс. слева БДП
+            let delValue = treeValues[operationData['node_index']];
+            let delNode = tree.search(delValue);
+
+            let isMaxLeft = +operationData['operation_template_id'] === 12
+
+            let сhangeNode = findChangeNode(delNode, isMaxLeft);
+            
+            if (!сhangeNode)
+                сhangeNode = ""
+            else
+                сhangeNode = сhangeNode.data
+
+            let resTree = _.cloneDeep(tree)
+            resTree.remove(
+                delValue, 
+                isMaxLeft
+            );
+
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(resTree.bfs(resTree.root), true)
+            ]
+
+            suboperations = [
+                new SubOperation(
+                    suboperationData[0]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(delValue)
+                ),
+                new SubOperation(
+                    suboperationData[1]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(сhangeNode)
+                ),
+            ]
+        } else if ([7, 8].includes(+operationData['operation_template_id'])) { // Добавление без повторений слева и справа БДП
+            addValue = fullTreeValues[operationData['node_index']];
+            let valueToAdd = fullTreeValues[Math.floor((operationData['node_index'] - 1) / 2)]
+
+            let addDirection = (valueToAdd > addValue) ? 'left' : 'right';
+
+            let resTree = _.cloneDeep(tree)
+            resTree.insert(addValue);
+
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(resTree.bfs(resTree.root), true)
+            ]
+
+            suboperations = [
+                new SubOperation(
+                    suboperationData[0]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(valueToAdd)
+                ),
+                new SubOperation(
+                    suboperationData[1]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(addDirection)
+                ),
+            ]
+        } else if ([5, 6].includes(+operationData['operation_template_id'])) { // БДП с добавлением дубликата слева или справа
+            addValue = getDublicates(treeValues, operationData['node_index'], operationData['operation_template_id'] === 5);
+            let valueToAdd = treeValues[Math.floor((operationData['node_index'] - 1) / 2)]
+
+            let addDirection
+            if (valueToAdd > addValue) {
+                addDirection = 'left';
+            } else if (valueToAdd < addValue) {
+                addDirection = 'right'
+            } else {
+                if (+operationData['operation_template_id'] === 5) {
+                    addDirection = 'left'
+                } else if (+operationData['operation_template_id'] === 6) {
+                    addDirection = 'right'
+                }
+            }
+
+            let resTree = _.cloneDeep(tree)
+            let directionDescription;
+            if (+operationData['operation_template_id'] === 5) {
+                resTree.insert(addValue, true, true);
+                directionDescription = '(добавление дубликата влево)'
+            } else if (+operationData['operation_template_id'] === 6) {
+                resTree.insert(addValue, true, false);
+                directionDescription = '(добавление дубликата вправо)'
+            }
+
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(resTree.bfs(resTree.root), true)
+            ]
+
+            suboperations = [
+                new SubOperation(
+                    suboperationData[0]['suboperation_text'] + ' ' + directionDescription, 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(valueToAdd)
+                ),
+                new SubOperation(
+                    suboperationData[1]['suboperation_text'] + ' ' + directionDescription, 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(addDirection)
+                ),
+            ]
+        } else if ([9, 10].includes(+operationData['operation_template_id'])) { //Добавление слева и справа в АВЛ
+            let treeKeys = tree.bfs(tree.root);
+
+            addValue = fullTreeValues[operationData['node_index']];
+            let valueToAdd = fullTreeValues[Math.floor((operationData['node_index'] - 1) / 2)];
+
+            let addDirection = (valueToAdd > addValue) ? 'left' : 'right';
+            
+            let rotateList = [];
+            let resTree = _.cloneDeep(tree);
+            resTree.insert(addValue, rotateList);
+
+            let temp = getTree(1)
+            fillTree(
+                temp,
+                treeKeys
+            )
+            temp.insert(addValue)
+            let treeKeysBeforeBalancing = temp.bfs(temp.root)
+
+            let balancingSuboperations = []
+            for (let index in rotateList) {
+                let inputdata = null
+                
+                if (index > 0) {
+                    inputdata = new inputData(rotateList[index-1].treeNodes, true)
+                } else {
+                    inputdata = new inputData(treeKeysBeforeBalancing, true)
+                }
+                
+                let outputdata = new outputData(rotateList[index].balancingNodes)
+                balancingSuboperations.push(new SubOperation(suboperationData[2]['suboperation_text'], inputdata, outputdata))
+                balancingSuboperations.push(new SubOperation(suboperationData[3]['suboperation_text'], inputdata, new outputData(rotateList[index].rotate)))
+            }
+
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(resTree.bfs(resTree.root), true)
+            ]
+
+            suboperations = [
+                new SubOperation(
+                    suboperationData[0]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(valueToAdd)
+                ),
+                new SubOperation(
+                    suboperationData[1]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(addDirection)
+                ),
+                ...balancingSuboperations,
+            ]
+        } else if ([13, 14].includes(+operationData['operation_template_id'])) { // Удаление из АВЛ с заменой на мин. справа и макс. слева
+            let treeKeys = tree.bfs(tree.root);
+            let delValue = treeValues[operationData['node_index']];
+            let delNode = tree.search(delValue);
+
+            let isMaxLeft = +operationData['operation_template_id'] === 14
+
+            let сhangeNode = findChangeNode(delNode, isMaxLeft);
+            
+            if (!сhangeNode)
+                сhangeNode = ""
+            else
+                сhangeNode = сhangeNode.data
+
+            let rotateList = []
+            let resTree = _.cloneDeep(tree)
+            resTree.remove(
+                delValue, 
+                isMaxLeft,
+                rotateList
+            );
+            
+            let temp = getTree(1)
+            fillTree(
+                temp,
+                treeKeys
+            )
+            temp.remove(delValue, isMaxLeft)
+            let treeKeysBeforeBalancing = temp.bfs(temp.root)
+
+            let balancingSuboperations = []
+            for (let index in rotateList) {
+                let inputdata = null
+                
+                if (index > 0) {
+                    inputdata = new inputData(rotateList[index-1].treeNodes, true)
+                } else {
+                    inputdata = new inputData(treeKeysBeforeBalancing, true)
+                }
+                
+                let outputdata = new outputData(rotateList[index].balancingNodes)
+                balancingSuboperations.push(new SubOperation(suboperationData[0]['suboperation_text'], inputdata, outputdata))
+                balancingSuboperations.push(new SubOperation(suboperationData[1]['suboperation_text'], inputdata, new outputData(rotateList[index].rotate)))
+            }
+
+            operationIO = [
+                new inputData(tree.bfs(tree.root), true),
+                new outputData(resTree.bfs(resTree.root), true)
+            ]
+
+            suboperations = [
+                new SubOperation(
+                    suboperationData[2]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(delValue)
+                ),
+                new SubOperation(
+                    suboperationData[3]['suboperation_text'], 
+                    new inputData(tree.bfs(tree.root)), 
+                    new outputData(сhangeNode)
+                ),
+                ...balancingSuboperations,
+            ]
+        }
+
+
+        let operation = new Operation(
+            operationData['operation_text'],
+            suboperations,
+            operationIO[0],
+            operationIO[1]
+        )
+
+        console.log(operation)
+
+        const compareArrays = ([1, 2, 3, 4, 15, 16].includes(+operationData['operation_template_id'])) ?  
+            (a, b) => a.length === b.length && a.every((element, index) => element == b[index]) : 
+            (a, b) => a.sort().join('') === b.sort().join('');
+       
+////////////////////////////////////////////////////////////////////////
+        function checkResults(userResult, subOperationResult, i) {
+            let _userResult = userResult
+            if (typeof userResult === 'string') {
+                _userResult = [document.querySelector(userResult).value]
+            }
+            // console.log(_userResult, typeof subOperationResult)
+
+            if (compareArrays(_userResult, subOperationResult)) {
+            // if (compareArrays(_userResult, [subOperationResult[0].id])) {
+                if (!(i in suboperation_error_count)) {
+                    suboperation_error_count[i] = 0;
+                }
+
+                let decision=document.querySelector('div[name="decision"]')
+                decision.className = 'correct';
+                
+                decision.innerHTML=`Все верно!`
+                
+                suboperationDiv = document.querySelector('div[name="suboperationBlock"]')
+                suboperationDiv.innerHTML = drawSuboperationBlock(operation.subOperations, i + 1)
+                treeNodesElement = document.querySelector(`div[name=${treeNodesName}]`);
+            } else {
+                if (i in suboperation_error_count) {
+                    suboperation_error_count[i] = suboperation_error_count[i] + 1;
+                } else {
+                    suboperation_error_count[i] = 1;
+                }
+                let decision=document.querySelector('div[name="decision"]')
+
+                decision.className = 'uncorrect';
+                decision.innerHTML=`Ошибка!<br><p>Количество ошибок: ${(suboperation_error_count[i])}</p>
+`
+            }
+
+            Array.from(selectedNodes).forEach(function(nodeId) {
+                let element = document.getElementById(`${nodeId}`);
+                element.classList.remove("selected");
+                element.isSelected = false;
+            });
+            selectedNodes = []
+
+            treeNodesElement.textContent=''
+        }
+
+        function drawSuboperationBlock(suboperationList, i) {
+            let decision=document.querySelector('div[name="decision"]')
+            if (i >= suboperationList.length) {
+                selectedNodes = [];
+                
+                if ([5, 6].includes(+operationData['operation_template_id'])) {
+                    fillTree(
+                        tree, 
+                        operation.outputData.keys,
+                        +operationData['operation_template_id'],
+                        true,
+                        operationData['operation_template_id'] == 5
+                    );
+                } else {
+                    fillTree(
+                        tree, 
+                        operation.outputData.keys,
+                        +operationData['operation_template_id'],
+                    );
+                }
+
+                
+                treeDivElement.innerHTML = tree.treePrinter();
+                
+                let saveErrorCountElement = document.querySelector('input[name=suboperation_error_count]');
+                saveErrorCountElement.value = JSON.stringify(suboperation_error_count);
+
+                let saveStepCountElement = document.querySelector('input[name=step_count]');
+                saveStepCountElement.value = suboperationList.length;
+                
+                let sum_error = Object.values(suboperation_error_count).reduce((acc, val) => acc + val, 0);
+                
+                suboperationText = `
+                    <h3>Все выполнено верно!</h3>
+                    <form action='' method='post'>
+                        <p>Итого ошибок: ${JSON.stringify(sum_error)}</p>
+                        <input type="text" value='${JSON.stringify(suboperation_error_count)}' name="suboperation_error_count" hidden />
+                        <input type="text" value="${suboperationList.length}" name="step_count" hidden/>
+                        <input type="submit" style='margin-top:16px' value="Следующее задание" name='next_task' style='width: 328px;' class = 'transition_input'/>
+                    </form>
+                `;
+
+
+                return suboperationText;
+            }
+            else {
+                suboperation = operation.subOperations[i];
+
+                if ([5, 6, 7, 8, 9, 10].includes(+operationData['operation_template_id']) && i == 1) {
+                    addDirection = `['${suboperation.outputData.keys}']`
+                    suboperationText = `<b class='count_sub'>${i + 1} из ${suboperationList.length}</b>
+                    <br> ${suboperation.text} 
+                    <ul>
+                        <li><label>
+                            Слева
+                            <input type='radio' name='direction' value='left' checked />
+                        </label></li>
+
+                        <li><label>
+                            Справа
+                            <input type='radio' name='direction' value='right' />
+                        </label></li>
+                    </ul>
+                        <input type="button" value="Проверить" onclick="checkResults('input[name=direction]:checked', ${addDirection}, ${i})" style='width: 328px;' class='check_input'>`;
+                    return suboperationText;
+                } else if ([9, 10, 13, 14].includes(+operationData['operation_template_id']) && i % 2 == 1 && i > 2) {
+                    rotateDirection = `['${suboperation.outputData.keys}']`
+                    suboperationText = `<b class='count_sub'>${i + 1} из ${suboperationList.length}</b><br> ${suboperation.text} 
+                    <ul>
+                        <li> <label>
+                            Левый
+                            <input type='radio' name='direction' value='left' checked />
+                        </label></li>
+
+                        <li> <label>
+                            Правый
+                            <input type='radio' name='direction' value='right' />
+                        </label></li>
+
+                        <li> <label>
+                            Левый-правый
+                            <input type='radio' name='direction' value='left-right' />
+                        </label></li>
+
+                        <li> <label>
+                            Правый-левый
+                            <input type='radio' name='direction' value='right-left' />
+                        </label></li>
+                    </ul>
+                        <input type="button" value="Проверить" onclick="checkResults('input[name=direction]:checked', ${rotateDirection}, ${i})" style='width: 328px;' class='check_input'>
+                    `;
+                    return suboperationText;
+                }
+                
+                if (suboperation.inputData.isTree) {
+                    selectedNodes = [];
+                    tree = getTree(1) //БДП
+                    fillTree(
+                        tree, 
+                        suboperation.inputData.keys,
+                        +operationData['operation_template_id'],
+                    );
+                    // console.log(tree)
+                    treeDivElement.innerHTML = tree.treePrinter();
+                }
+               
+                keysStr = `[${suboperation.outputData.keys.toString()}]`
+   
+                if (keyTypeValue === 2) {
+                    if (typeof suboperation.outputData.keys === 'string') {
+                        keysStr = `['${suboperation.outputData.keys.toString()}']`
+                    } else {
+                        keysStr = `[${suboperation.outputData.keys.map((item) => "'" + item + "'")}]`
+                    }
+                }
+                // console.log(keysStr)
+
+                suboperationText = `<b class='count_sub'>${i + 1} из ${suboperationList.length} </b> 
+                <br> ${suboperation.text}: <div name="treeNodes" style="display: inline-block; color:#50ba52; font-weight:bold ">${selectedNodes}</div> </p>
+                    <input type="button" value="Проверить" onclick="checkResults(selectedNodes, ${keysStr}, ${i})" style='width: 328px;' class='check_input'>`;
+                return suboperationText;
+            }
+        }
+
+        function drawOperationBlock(operation) {
+            let action_node = '';
+            if ([5, 6, 7, 8, 9, 10].includes(+operationData['operation_template_id'])) {
+                action_node = addValue;//fullTreeValues[operationData['node_index']];
+            } else if ([11, 12, 13, 14].includes(+operationData['operation_template_id'])) {
+                action_node = treeValues[operationData['node_index']];
+            }
+            
+            operationText = `<b>${operation.text} ${action_node}</b>`;
+            suboperationBlock = `<div name='suboperationBlock'>${drawSuboperationBlock(operation.subOperations, 0)}</div>`;
+            return operationText + suboperationBlock;
+        }
+
+        operationBlock.innerHTML = drawOperationBlock(operation);
+        treeNodesElement = document.querySelector(`div[name=${treeNodesName}]`);
+
+        // let _alert = document.querySelector('div[name="alert"]')
+        // _alert.innerText = suboperations.length
+
+    </script>
+{% endblock %}
+

@@ -1,0 +1,47 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Управление процессом тестирования {% endblock %}
+{% macro create_menu(label_name,url_1,url_2,text_1,text_2) %}
+<div class="column-flex-item">
+    <label><p style="font-family: var(--second-family);
+        font-weight: 500;
+        font-size: 20px;
+        line-height: 140%;
+        letter-spacing: 0.01em;
+        color: #000;">{{label_name}}:</p>
+    <ul>
+        <li><a style="font-family: var(--second-family);
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 125%;
+            letter-spacing: 0.01em;
+            text-decoration: underline;
+            text-decoration-skip-ink: none;
+            color: #117092;" href={{url_for(url_1)}}>{{text_1}}</a></li>
+        <li><a style="font-family: var(--second-family);
+            font-weight: 400;
+            font-size: 16px;
+            line-height: 125%;
+            letter-spacing: 0.01em;
+            text-decoration: underline;
+            text-decoration-skip-ink: none;
+            color: #117092;" href={{url_for(url_2)}}>{{text_2}}</a></li>
+    </ul>
+    </label>
+</div>
+{% endmacro %}
+{% block content %}
+
+    <div class="column-flex" style="padding: 0px 120px;">
+        <button class="dropbtn">Управление процессом тестирования</button>
+        
+        {{create_menu('Шаблон дерева','tree_template','tree_template_search','Создать шаблон дерева','Просмотреть существующие шаблоны деревьев')}}
+        
+        {{create_menu('Шаблон тестового задания','task_template','task_template_search','Создать шаблон тестового задания','Просмотреть существующие шаблоны тестовых заданий')}}
+        
+        {{create_menu('Шаблон теста','test_template','test_template_search','Создать шаблон теста','Просмотреть существующие шаблоны тестов')}}
+        
+        {{create_menu('Сеанс тестирования','testing_session','testing_session_search','Создать сеанс тестирования','Просмотреть существующие сеансы тестирования')}}
+
+    </div>
+{% endblock %}

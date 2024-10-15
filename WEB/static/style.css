@@ -1,0 +1,331 @@
+.node {
+    display: inline-block;
+    border: 1px solid black;
+    /* height: 3vw;
+    width: 3vw; */
+    text-align: center;
+    line-height: 30px;
+    margin: 0px 0px;
+    border-radius: 100%;
+    font-size: 12px;
+}
+
+.table {
+	width: 880px;
+    height: 140px;
+}
+.table th {
+	border-radius: 8px 0 0 8px;
+padding: 8px 16px;
+width: 85px;
+height: 54px;
+background: rgba(26, 168, 219, 0.1);
+font-family: var(--second-family);
+font-weight: 500;
+font-size: 16px;
+letter-spacing: 0.01em;
+color: #147ea4;
+}
+.table td {
+    border-bottom: 1px solid #d7d7d7;
+    padding: 12px 16px;
+    width: 148px;
+    height: 43px;
+    font-family: var(--second-family);
+font-weight: 400;
+font-size: 16px;
+letter-spacing: 0.01em;
+color: #000;
+}
+
+body, input, select, button, li, div, p, label {
+    font-family: 'Roboto', sans-serif;
+}
+
+.flex {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.size {
+    height: 2vw;
+    width: 2vw;
+}
+
+.empty-size {
+    display: inline-block;
+    margin: 0px 0px;
+    line-height: 30px;
+
+    height: 2vw;
+    width: 2vw;
+}
+
+
+
+li{
+    list-style-type: none;
+}
+
+select[aria-readonly="true"] {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.left-part-container {
+    min-width: 20%;
+    gap:24px;
+}
+.right-part-container {
+    max-width: 70%;
+}
+
+.border-bottom {
+    border-bottom: solid 3px rgb(0, 0, 0);
+}
+
+input[readonly] {
+    opacity: 0.5;
+}
+
+.column-flex {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap:40px;
+}
+
+
+.filter{
+    display: flex;
+    flex-direction: column;
+    gap:24px;
+}
+.row-flex {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    gap: 80px;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.column-flex-item {
+   
+}
+
+.scroll {
+    max-height: 500px;
+    overflow: auto;
+}
+
+.scroll::-webkit-scrollbar {
+    min-width: 12px;
+    max-width: 12px;
+}
+
+.scroll::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+    background-color: #888;
+}
+
+.scroll::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+}
+.date{
+    width: 240px;
+    height: 197px;
+    display: flex;
+    flex-direction: column;
+    gap:12px;
+}
+.save-button, .filter-button, .choose-button {
+    border: 2px solid #1aa8db;
+    border-radius: 8px;
+    padding: 12px 24px;
+    width: 149px;
+    height: 48px;
+    font-family: var(--second-family);
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 133%;
+    letter-spacing: 0.01em;
+    color: #147ea4;
+    background-color: #ffffff;
+}
+
+.save-button:hover, .filter-button:hover, .choose-button:hover {
+    background-color: rgb(90, 177, 223); 
+}
+
+.save-button:disabled, .filter-button:disabled, .choose-button:disabled {
+    background-color:#799ba7; 
+    border:none;
+    color: #fff;
+
+}
+
+.generate-new-button, .clear-button {
+    background-color: white;
+    color: black;
+    /* border-radius: 15px; */
+    border: 2px solid black;
+    min-width: 100px;
+    min-height: 40px;
+    margin: 0px 0px 0px 25px;
+}
+
+a { 
+    color: #4d4d4d;
+}
+a:visited {
+    color: #4d4d4d;
+}
+
+
+
+.generate-new-button:hover, .clear-button:hover {
+    background-color: rgb(192, 192, 192);
+    color: rgb(255, 255, 255);
+    border-color: rgb(192, 192, 192);
+}
+
+.generate-new-button:disabled, .clear-button:disabled {
+    background-color: rgb(255, 255, 255);
+    color: rgb(123, 123, 123);
+    border-color: rgb(123, 123, 123);
+}
+
+
+select:focus, input[type="number"]:focus {
+    border-color: #838383;
+    box-shadow: 0 0 5px rgba(115, 115, 115, 0.5);
+}
+
+input[type='number'] {
+    padding: 3px;
+}
+
+select {
+    padding: 3px;
+}
+
+.message {
+    padding: 10px;
+    border: 1px dashed rgb(123, 123, 123);
+    color: rgb(123, 123, 123);
+}
+.ava:hover{
+    opacity: 0.6;
+}
+.delete-button:hover {
+    background: rgba(217, 48, 48, 0.16);
+}
+.delete-button:active {
+    background: rgba(217, 48, 48, 0.24);
+}
+.delete-button:disabled {
+    background-color: rgb(255, 255, 255);
+    color: rgb(237, 109, 109);
+    border: 1px solid rgb(237, 109, 109);
+    opacity: 0.6;
+}
+
+
+.delete-button {
+    border-radius: 8px;
+    padding: 12px 24px;
+    background: rgba(217, 48, 48, 0.08);
+    font-family: var(--font-family);
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 150%;
+    letter-spacing: 0.01em;
+    color: #bd1f1f;
+    border:none;
+}
+
+.margin-top {
+    margin-top: 25px;
+}
+
+.search-result-block-width {
+    width: 100%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+img {
+    width: 100%;
+    height: 100%;
+}
+
+.formula-image {
+    width: 35%;
+    padding: 5px;
+}
+
+
+.dropbtn {
+    font-family: var(--second-family);
+    font-weight: 700;
+    font-size: 32px;
+    line-height: 150%;
+    letter-spacing: 0em;
+    color: #000;
+}
+
+/* The container <div> - needed to position the dropdown content */
+.dropdown {
+    position: relative;
+    display: inline-block;
+    
+}
+
+/* Dropdown Content (Hidden by Default) */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 10px 16px 0px rgba(0,0,0,0.3);
+    z-index: 1;
+    font-size: 16px;
+}
+
+/* Links inside the dropdown */
+
+.dropdown-content ul {
+    padding: 0px;
+    margin-bottom:0px;
+    margin-top: 0px;
+}
+
+.dropdown-content div {
+    margin-bottom: 10px;
+}
+
+.dropdown-content li {
+    color: #4d4d4d;
+    text-align: left;
+    display: block;
+    padding-bottom: 5px;
+    padding-left: 10px;
+    font-size: 14px;
+}
+
+/* Change color of dropdown links on hover */
+.dropdown-content a:hover {background-color: #ddd;}
+
+/* Show the dropdown menu on hover */
+.dropdown:hover .dropdown-content {display: block;}
+
+/* Change the background color of the dropdown button when the dropdown content is shown */
+.dropdown:hover .dropbtn {background-color: #ffffff;}

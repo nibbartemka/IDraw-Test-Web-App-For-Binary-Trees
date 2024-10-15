@@ -1,0 +1,67 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Успеваемость {% endblock %}
+
+{% macro render_table(data) %}
+    <table class="table">
+        <tr>
+            <th>Студент</th>
+            <th>Подгруппа</th>
+            <th>Результат</th>
+        </tr>
+        {% for item in data %}
+            <tr>
+                {% for value in item.values() %}
+                    <td>{{value}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+{% endmacro %}
+
+{% block content %}
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Участники тестирования</p>
+    
+</div>
+
+    <div class="row-flex" style="padding: 0px 120px;">  
+        <div class="column-flex left-part-container">
+            <div class="column-flex-item">
+                <b class="b_filter">Фильтры:</b>
+            </div>
+            <form action="" method="post">
+                <div class="column-flex-item">
+                    <label class="b_filter">Подгруппы:</label>
+                    
+                        {% for subgroup in subgroup_data %}
+                            <div class="b_filter">
+                                {{subgroup['subgroup_name']}}
+                                <input class="b_filter"
+                                    type="checkbox" 
+                                    value="{{subgroup['subgroup_id']}}" 
+                                    name="subgroup_ids"
+                                    {% if subgroup['subgroup_id'] in checked_subgroups %} checked {% endif %}
+                                />
+                            </div>
+                        {% endfor %}
+                </div>
+
+                <div style="display:flex;flex-direction:column;">
+                    <input type="submit" name="filter" value="Применить" class="transition_input" style="margin-bottom: 12px; margin-top: 12px;"/>
+                    <input type="submit" name="clear" value="Очистить" class="check_input" />
+                </div>
+            </form>
+        </div>
+        <div class="column-flex right-part-container">
+            <div class="column-flex-item">
+                <b class="b_filter">Успеваемость:</b>
+            </div>
+            <div class="column-flex-item">
+               {{render_table(testing_session_completition_data)}}
+            </div>
+        </div>
+    </div>
+{% endblock %}

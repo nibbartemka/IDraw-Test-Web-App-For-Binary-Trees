@@ -1,0 +1,187 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Сеанс тестирования {% endblock %}
+
+{% macro render_list(data, index, value, identifier) %}
+    {% for item in data %}
+        <form action="" method="post">
+            <div class="row-flex align-items-center margin-top card">
+                <div class="column-flex">
+                        <input type="text" hidden name="subgroup_ids" value="{{subgroup_ids}}" />
+                        <input type="text" name="del_subgroup_id" value="{{item[index]|int}}" hidden>
+                        <div class="column-flex-item label_filter">
+                            <div>
+                            {{item[identifier]}}
+                            <br>
+                            {{item[value]}}
+                            </div>
+                        </div>
+                <input type="submit" name="del_task_template" value="Удалить" class="delete-button"/>
+
+                </div>
+            </div>
+        </form>
+    {% endfor %}
+{% endmacro %}
+
+{% macro render_image_radio_button(label, select_name, indexes, values, checked_value) %}
+    <label>
+        {{label}} <br>
+        <div style="overflow: auto;">
+            {% for index, value in zip(indexes, values) %}
+                <div class="formula-image row-flex">
+                    <img src="{{value}}"/>
+                    <input 
+                        type="radio" 
+                        value="{{index}}" 
+                        name="{{select_name}}" 
+                        {% if checked_value == index %} checked {% endif %} 
+                    />
+                </div>
+            {% endfor %}
+        </div>
+    </label>
+{% endmacro %}
+
+{% block content %}
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+    
+    <p class="dropbtn">Создать сеанс тестирования</p>
+    
+    <p><a href="{{url_for('testing_session_search')}}">Посмотреть все сеансы тестирования</a></p>
+</div>
+
+<div class="row-flex" style = 'padding: 0px 120px;'>  
+            <div class="filter">
+                <form action="{{url_for('test_template_search', is_directly=0)}}" method="get">
+             
+                        <label class="label_filter">
+                            Шаблон теста: <input type="submit" value='Найти' name="find" class="check_input" /><br>
+                        </label>
+                            {% if test_template %}
+                                <div style="width: 100%;"class='card label_filter' > 
+                                    <p>
+                                        <a href="{{url_for('test_template_edit', test_template_id=test_template['test_template_id'], is_directly=0)}}">№{{test_template['test_template_id']}}</a>
+                                        <br>
+                                        {% for value in test_template['test_template_description'].split(SEPARATOR) %}
+                                            {{value}}<br>
+                                        {% endfor %}
+                                    </p>
+                                </div>
+                            {% endif %}
+                </form>
+                <div class="column-flex-item" style="width: 262px;">
+                    <form action="{{url_for('subgroup_search', is_directly=0)}}" method="get">
+                        <label class="label_filter">
+                            Подгруппы:
+                            <input type="submit" value="Найти" name="find" class="check_input" />
+                        </label>
+                    </form>
+                    <form action="" method="post">
+                        {{render_list(subgroups, 'subgroup_id', 'student_count', 'subgroup_identifier')}}
+                    </form>
+                </div>
+            </div>
+
+    <div class="column-flex left-part-container" >   
+        <form action="" method="post">
+            <div class="column-flex-item" style="margin-bottom:24px">
+                <label class="label_filter">
+                    Название тестирования:<br>
+                    <input style="width: 360px;" placeholder="Введите название тестирования" type="text" maxlength="30" value="{{testing_session_name}}" name="testing_session_name" class="input_text" />
+                </label>
+            </div>
+            <div class="column-flex-item" style="margin-bottom:24px">
+                <label class="label_filter">
+                    Дата тестирования:<br>
+                    <input type="date" min="{{testing_session_date}}" value="{{testing_session_date}}" name="testing_session_date" class="date_input"/>
+                </label>
+            </div>
+            <div style=" display:flex;flex-direction: row; gap:24px;  margin-bottom:24px">
+                <label class="label_filter">
+                    Время начала тестирования:<br>
+                    <input class="date_input" type="time" min={{testing_session_begin_time}} value="{{testing_session_begin_time}}" name="testing_session_begin_time"/>
+                </label>
+
+                <label class="label_filter">
+                    Время окончания тестирования:<br>
+                    <input class="date_input" type="time" min={{testing_session_begin_time}} value={{testing_session_end_time}} name="testing_session_end_time" />
+                </label>
+            </div>
+            
+            <div class="column-flex-item" style="margin-bottom:24px">
+                <label class="label_filter">
+                    Балльность:<br>
+                    <input class="input_text" type="number" min=5 max="100"  name="testing_session_bar"  step="5" value={{testing_session_bar}} class="input_text"/>
+                </label>
+            </div>
+            <div class="column-flex-item label_filter"  style="margin-bottom:24px">
+                {{render_image_radio_button('Формула расчета оценки:', 'formula_test_id', formula_indexes, formula_pictures, formula_test_id)}}
+                <div class="mini">N - число заданий</div>
+                <div class="mini">r<sub>i</sub> - балл студента на i-ом задании</div>
+                <div class="mini">z<sub>i</sub> - сложность i-ого задания</div>
+                <div class="mini">B - бальность</div>
+                <div class="mini">Z - суммарная сложность заданий</div>
+            </div>
+            <input type="text" name="test_template_id" value="{{test_template_id}}" hidden />
+            <input type="text" name="subgroup_ids" value="{{subgroup_ids}}" hidden/>
+            <div class="column-flex-item margin-top">
+                <input type="submit" name="save" value="Сохранить" class="transition_input"/>
+            </div>
+            {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="column-flex-item message margin-top">{{message|safe}}</div>
+                        {% endfor %}
+                    {% endif %}
+            {% endwith %}
+            
+        </form>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block footer %}
+    <script>
+        const beginTimeName = 'testing_session_begin_time'
+        const beginTimeElement = document.querySelector(`input[name=${beginTimeName}]`)
+        const endTimeName = 'testing_session_end_time'
+        const endTimeElement = document.querySelector(`input[name=${endTimeName}]`)
+        const dateName = 'testing_session_date'
+        const dateElement = document.querySelector(`input[name=${dateName}]`)
+
+        const currentDate = new Date()
+        const minDate = currentDate.getFullYear() + "-" + (currentDate.getMonth() + 1).toString().padStart(2, "0") + "-" + currentDate.getDate().toString().padStart(2, "0");
+        const minTime = beginTimeElement.min
+
+        dateElement.addEventListener('change', function() {
+            if (this.value !== minDate) {
+                beginTimeElement.min = ''
+                endTimeElement.min = ''
+            } else {
+                beginTimeElement.min = minTime
+                endTimeElement.min = minTime
+            }
+        })
+
+        beginTimeElement.addEventListener('change', function() { 
+            if (this.value > endTimeElement.value) { 
+                this.max = endTimeElement.value 
+            }  
+            else if (this.value < this.min) { 
+                this.min = this.value 
+            } 
+        }) 
+ 
+        endTimeElement.addEventListener('change', function() { 
+            if (this.value < beginTimeElement.value) { 
+                this.min = beginTimeElement.value 
+            }  
+            else if (this.value > this.max) { 
+                this.max = this.value 
+            } 
+        })
+    </script>
+{% endblock %}

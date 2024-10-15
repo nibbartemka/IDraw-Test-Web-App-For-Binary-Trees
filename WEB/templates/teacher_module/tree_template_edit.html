@@ -1,0 +1,104 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Редактировать шаблон дерева {% endblock %}
+
+{% macro render_select(label, select_name, indexes, values, selected_value, disabled_data) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <select class="input_text" name="{{select_name}}" {% if select_name in disable_data %} aria-readonly="true" {% endif %}>
+            {% for index, value in zip(indexes, values) %}
+                <option class="input_text" value="{{index}}" {% if selected_value == index %} selected {% endif %}>{{value}}</option>
+            {% endfor %}
+        </select>
+    </label>
+{% endmacro %}
+
+{% macro render_number(label, input_name, min, max, step, entered_value, disabled_data) %}
+    <label class="b_filter">
+        {{label}} <br>
+        <input class="input_text" type="number" name="{{input_name}}" min="{{min}}" max="{{max}}" step="{{step}}" value="{{entered_value}}" {% if input_name in disable_data %} readonly {% endif %}>
+    </label>
+{% endmacro %}
+
+{% block content %}
+
+<div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+    <p class="dropbtn">Редактирование дерева</p>
+    
+    <div class="column-flex-item">
+        {% if not is_directly %}
+        <p><a class="a_blue" href="{{url_for('tree_template_search', is_directly=is_directly)}}">Перейти к выбору шаблона дерева</a></p>
+        <p><a class="a_blue" href="{{task_url}}" >Вернуться к шаблону тестового задания</a></p>
+        {% else %}
+        <p><a class="a_blue" href="{{url_for('tree_template_search', is_directly=is_directly)}}">Перейти к поиску шаблона дерева</a></p>
+        {% endif %}
+        <p><a class="a_blue" href="{{url_for('tree_template', is_directly=is_directly)}}">Создать новый шаблон</a></p>
+    </div>
+
+
+</div>
+
+    <form action="" method="post">
+        <div class="row-flex" style="padding: 0px 120px;">
+            <div class="column-flex left-part-container">
+                <div class="column-flex-item">
+                    {{ render_select('Тип дерева:', 'tree_type_id', type_indexes, type_values, tree_type_id, disabled_data) }}
+                </div>
+                <div class="column-flex-item">
+                    {{ render_select('Тип ключа:', 'key_template_id', key_indexes, key_values, key_template_id, disabled_data) }}
+                </div>
+                <div class="column-flex-item">
+                    {{render_number('Высота дерева', 'tree_height', 3, 5, 1, tree_height, disabled_data)}}
+                </div>
+                <div class="column-flex-item">
+                    {{render_number('Кол-во ключей', 'node_count', 4, 31, 1, node_count, disabled_data)}}
+                </div>
+                <div class="column-flex-item">
+                    {{render_number('Сложность шаблона', 'tree_difficulty', 0.1, 1, 0.1, tree_difficulty, disabled_data)}}
+                </div>
+                <div class="column-flex-item">
+                    <input type="text" name="tree_structure" value="{{tree_structure}}" hidden/>
+                </div>    
+                <div style="display:flex;flex-direction:column; justify-content: flex-start;">
+                    <input type="submit" name="save_template" value="Сохранить" class="transition_input" style="margin-bottom: 12px; margin-top: 12px;"{%if disable_data|length == 5 %} disabled {% endif %}/>
+                    <input type="submit" name="generate_new" value="Сгенерировать еще раз" style="margin-bottom: 12px;" class="check_input" {% if disable_data %} disabled {% endif %} />
+                    <input type="submit" name="del_template" value="Удалить" class="delete-button" {% if disable_data %} disabled {% endif %}/>
+                </div>
+                {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="column-flex-item message">{{message}}</div>
+                            {% endfor %}
+                        {% endif %}
+                {% endwith %}
+              
+            </div>
+            
+            <div class="right-part-container">
+                <label class="b_filter">Возможный вариант дерева:</label>
+                <div name="tree" class="tree margin-top">
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
+
+{% block footer %}
+    <script src="{{url_for('static', filename='js/Node.js')}}"></script>
+    <script src="{{url_for('static', filename='js/tree_base.js')}}"></script>
+    <script src="{{url_for('static', filename='js/BST.js')}}"></script>
+    <script src="{{url_for('static', filename='js/AVL.js')}}"></script>
+    <script src="{{url_for('static', filename='js/tree_template_creation.js')}}"></script>
+    <script>
+        const treeDifficultyElement = document.querySelector(`input[name='tree_difficulty']`)
+
+        treeDifficultyElement.addEventListener('change', function() {
+            if (this.value < this.min) {
+                this.value = this.min
+            } else if (this.value > this.max) {
+                this.value = this.max
+            }
+        })
+    </script>
+{% endblock %}

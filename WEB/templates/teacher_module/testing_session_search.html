@@ -1,0 +1,79 @@
+{% extends "teacher_module/page_template.html" %}
+
+{% block title %} Найти сеанс тестирования {% endblock %}
+
+{% macro render_table(data) %}
+    <div class="scroll column-flex-item">
+        <table class="table">
+            <tr>
+                <th>Идентификатор</th>
+                <th>Название</th>
+                <th>Дата проведения</th>
+                <th>Время начала</th>
+                <th>Время окончания</th>
+                <th>Балльность</th>
+                <th>Выполнили</th>
+            </tr>
+            {% for item in data %}
+                <tr>
+                    <td><a href="{{url_for('testing_session_edit', testing_session_id=item['testing_session_id'], is_directly=0)}}">№{{item['testing_session_id']}}</a></td>
+                    {% for col_value in item['testing_session_description'].split(SEPARATOR) %}
+                        <td>{{col_value}}</td>
+                    {% endfor %}
+                    <td><a href="{{url_for('testing_session_completition', testing_session_id=item['testing_session_id'])}}">{{item['student_completed_count']}}/{{item['student_count']}}</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endmacro %}
+
+{% block content %}
+
+    <div style = 'display: flex; flex-direction: column;margin-left: 120px; justify-content: left; margin-bottom: 40px;'>
+        
+        <p class="dropbtn">Все сеансы тестирования</p>
+        
+        <a  class="a_blue" href="{{url_for('testing_session', is_directly=1)}}">Создать новый сеанс тестирования?</a>
+    </div>
+
+
+    <div class="row-flex" style = 'padding: 0px 120px;'>  
+                <form action="" method="post">
+                    <div class="filter">
+                        <b class="b_filter">Фильтры:</b>
+                        <label class="label_filter">
+                            <div class = 'date'>
+                                <p>Дата проведения:</p>
+                                от <input type="date" name="left_border_date" value="{{left_border_date}}" class="date_input">
+                                до <input type="date" name="right_border_date" value="{{right_border_date}}" class="date_input">
+                            </div>
+                        </label>
+                        <input type="submit" name="filter" value="Применить" class="check_input" />
+                    </div>
+                </form>
+
+            <div class="column-flex">
+                <div class="column-flex-item">
+                    <div>
+                        <b class="b_filter">Предстоящие сеансы тестирования:</b>
+                    </div>
+                        {% if upcoming_testing_session %}
+                            {{render_table(upcoming_testing_session)}}
+                        {% else %}
+                        <p class="b_filter">Сеансов не найдено</p>
+                        {% endif %}
+                </div>
+                <div class="column-flex-item">
+                    <div>
+                        <b class="b_filter">Прошедшие сеансы тестирования:</b>
+                    </div>
+                    {% if passed_testing_session %}
+                        {{render_table(passed_testing_session)}}
+                    {% else %}
+                    <p class="b_filter">Сеансов не найдено</p>
+                    {% endif %}
+                    
+                </div>
+            </div>
+    </div>
+{% endblock %}
